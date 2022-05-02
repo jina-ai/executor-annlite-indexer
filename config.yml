@@ -1,0 +1,4 @@
+jtype: AnnliteIndexer
+metas:
+  py_modules:
+    - executor.py
