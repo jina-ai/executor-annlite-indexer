@@ -3,9 +3,7 @@ from docarray.array.annlite import DocumentArrayAnnlite
 from docarray import Document, DocumentArray
 
 import numpy as np
-
 from executor import AnnliteIndexer
-
 
 
 def assert_document_arrays_equal(arr1, arr2):
