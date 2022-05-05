@@ -1,6 +1,3 @@
-import os
-import time
-
 import pytest
 from docarray.array.annlite import DocumentArrayAnnlite
 from docarray import Document, DocumentArray
@@ -9,8 +6,6 @@ import numpy as np
 
 from executor import AnnliteIndexer
 
-cur_dir = os.path.dirname(os.path.abspath(__file__))
-compose_yml = os.path.abspath(os.path.join(cur_dir, '../Dockerfile'))
 
 
 def assert_document_arrays_equal(arr1, arr2):
