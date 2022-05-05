@@ -12,7 +12,7 @@ class AnnliteIndexer(Executor):
         ef_construction: int = 200,
         ef_search: int = 50,
         max_connection: int = 16,
-        data_path: str = './workspace',
+        data_path: Optional[str] = None,
         *args,
         **kwargs,
     ):
@@ -42,7 +42,8 @@ class AnnliteIndexer(Executor):
                   'metric': metric,
                   'ef_construction': ef_construction,
                   'ef_search': ef_search,
-                  'max_connection': max_connection}
+                  'max_connection': max_connection,
+                  'data_path': data_path}
 
         self._index = DocumentArray(storage='annlite', config=config)
         self.logger = JinaLogger(self.metas.name)
@@ -52,7 +53,8 @@ class AnnliteIndexer(Executor):
     def index(self, docs: DocumentArray, **kwargs):
 
         if docs:
-            self._index.extend(docs)
+            with self._index:
+                self._index.extend(docs)
 
     @requests(on='/search')
     def search(
@@ -78,6 +80,7 @@ class AnnliteIndexer(Executor):
         deleted_ids = parameters.get('ids', [])
         if len(deleted_ids) == 0:
             return
+
         del self._index[deleted_ids]
 
     @requests(on='/update')

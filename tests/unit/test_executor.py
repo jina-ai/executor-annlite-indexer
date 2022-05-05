@@ -57,7 +57,7 @@ def docker_compose():
     )
 
 
-def test_init(docker_compose):
+def test_init():
     annlite_index = AnnliteIndexer(metric='euclidean', n_dim=10)
 
     assert isinstance(annlite_index._index, DocumentArrayAnnlite)
@@ -65,13 +65,13 @@ def test_init(docker_compose):
     assert annlite_index._index._config.n_dim == 10
 
 
-def test_index(docs, docker_compose):
+def test_index(docs):
     annlite_index = AnnliteIndexer(metric='euclidean', n_dim=128)
     annlite_index.index(docs)
     assert len(annlite_index._index) == len(docs)
 
 
-def test_delete(docs, docker_compose):
+def test_delete(docs):
     annlite_index = AnnliteIndexer(metric='euclidean', n_dim=128)
     annlite_index.index(docs)
 
@@ -82,7 +82,7 @@ def test_delete(docs, docker_compose):
         assert doc_id not in annlite_index._index
 
 
-def test_update(docs, update_docs, docker_compose):
+def test_update(docs, update_docs):
     # index docs first
     annlite_index = AnnliteIndexer(metric='euclidean', n_dim=128)
     annlite_index.index(docs)
@@ -94,7 +94,7 @@ def test_update(docs, update_docs, docker_compose):
     assert annlite_index._index['doc1'].text == 'modified'
 
 
-def test_fill_embeddings(docker_compose):
+def test_fill_embeddings():
     annlite_index = AnnliteIndexer(metric='euclidean', n_dim=1)
 
     annlite_index.index(DocumentArray([Document(id='a', embedding=np.array([1]))]))
@@ -107,10 +107,15 @@ def test_fill_embeddings(docker_compose):
         annlite_index.fill_embedding(DocumentArray([Document(id='b')]))
 
 
-def test_persistence(docs, docker_compose):
-    annlite_index1 = AnnliteIndexer(metric='euclidean', n_dim=128)
+def test_persistence(docs):
+    from tempfile import TemporaryDirectory
+    data_path = TemporaryDirectory().name
+
+
+    annlite_index1 = AnnliteIndexer(metric='euclidean', n_dim=128, data_path=data_path)
     annlite_index1.index(docs)
-    annlite_index2 = AnnliteIndexer(metric='euclidean', n_dim=128)
+
+    annlite_index2 = AnnliteIndexer(metric='euclidean', n_dim=128, data_path=data_path)
     assert_document_arrays_equal(annlite_index2._index, docs)
 
 
@@ -118,9 +123,9 @@ def test_persistence(docs, docker_compose):
     'metric, metric_name',
     [('euclidean', 'euclid_similarity'), ('cosine', 'cosine_similarity')],
 )
-def test_search(metric, metric_name, docs, docker_compose):
+def test_search(metric, metric_name, docs):
     # test general/normal case
-    indexer = AnnliteIndexer(metric=metric)
+    indexer = AnnliteIndexer(metric=metric, n_dim=128)
     indexer.index(docs)
     query = DocumentArray([Document(embedding=np.random.rand(128)) for _ in range(10)])
     indexer.search(query, {})
