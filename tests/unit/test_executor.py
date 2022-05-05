@@ -45,18 +45,6 @@ def update_docs():
     )
 
 
-@pytest.fixture(scope='function')
-def docker_compose():
-    os.system(
-        f"docker-compose -f {compose_yml} --project-directory . up  --build -d --remove-orphans"
-    )
-    time.sleep(5)
-    yield
-    os.system(
-        f"docker-compose -f {compose_yml} --project-directory . down --remove-orphans"
-    )
-
-
 def test_init():
     annlite_index = AnnliteIndexer(metric='euclidean', n_dim=10)
 
@@ -114,7 +102,6 @@ def test_persistence(docs):
 
     annlite_index1 = AnnliteIndexer(metric='euclidean', n_dim=128, data_path=data_path)
     annlite_index1.index(docs)
-
     annlite_index2 = AnnliteIndexer(metric='euclidean', n_dim=128, data_path=data_path)
     assert_document_arrays_equal(annlite_index2._index, docs)
 
