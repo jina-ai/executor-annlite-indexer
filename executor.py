@@ -57,7 +57,6 @@ class AnnliteIndexer(Executor):
         """
         Perform a vector similarity search and retrieve the full Document match
         :param docs: the Documents to search with
-        :param parameters: the runtime arguments to `DocumentArray`'s match
         function. They overwrite the original match_args arguments.
         """
         docs.match(self._index)
