@@ -47,7 +47,7 @@ class AnnliteIndexer(Executor):
 
 
     @requests(on='/index')
-    def index(self, docs: DocumentArray):
+    def index(self, docs: DocumentArray, **kwargs):
 
         if docs:
             self._index.extend(docs)
@@ -66,9 +66,10 @@ class AnnliteIndexer(Executor):
         function. They overwrite the original match_args arguments.
         """
         docs.match(self._index, parameters=parameters)
+        return docs
 
     @requests(on='/delete')
-    def delete(self, parameters: Dict):
+    def delete(self, parameters: Dict, **kwargs):
         """
         Delete entries from the index by id
         :param parameters: parameters to the request
@@ -80,7 +81,7 @@ class AnnliteIndexer(Executor):
         del self._index[deleted_ids]
 
     @requests(on='/update')
-    def update(self, docs: DocumentArray):
+    def update(self, docs: DocumentArray, **kwargs):
         """
         Update doc with the same id, if not present, append into storage
         :param docs: the documents to update
@@ -95,7 +96,7 @@ class AnnliteIndexer(Executor):
                 )
 
     @requests(on='/fill_embedding')
-    def fill_embedding(self, docs: DocumentArray):
+    def fill_embedding(self, docs: DocumentArray, **kwargs):
         """
         retrieve embedding of Documents by id
         :param docs: DocumentArray to search with
@@ -104,7 +105,7 @@ class AnnliteIndexer(Executor):
             doc.embedding = self._index[doc.id].embedding
 
     @requests(on='/clear')
-    def clear(self):
+    def clear(self, **kwargs):
         """
         clear the database
         """
