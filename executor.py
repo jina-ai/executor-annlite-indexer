@@ -25,10 +25,6 @@ class AnnliteIndexer(Executor):
         :param ef_search: The query time accuracy/speed trade-off
         :param index_traversal_paths: Default traversal paths on docs
                 (used for indexing, delete and update), e.g. '@r', '@c', '@r,c'
-        :param search_traversal_paths: Default traversal paths on docs
-        (used for search), e.g. '@r', '@c', '@r,c'
-        :param columns: List of tuples of the form (column_name, str_type). Here str_type must be a string that can be
-                parsed as a valid Python type.
         :param data_path: Path of the folder where to store indexed data.
         """
         super().__init__(*args, **kwargs)
@@ -56,7 +52,6 @@ class AnnliteIndexer(Executor):
     def search(
         self,
         docs: 'DocumentArray',
-        parameters: Optional[Dict] = None,
         **kwargs,
     ):
         """
@@ -65,7 +60,7 @@ class AnnliteIndexer(Executor):
         :param parameters: the runtime arguments to `DocumentArray`'s match
         function. They overwrite the original match_args arguments.
         """
-        docs.match(self._index, parameters=parameters)
+        docs.match(self._index)
         return docs
 
     @requests(on='/delete')
