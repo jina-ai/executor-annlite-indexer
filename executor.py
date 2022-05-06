@@ -33,9 +33,6 @@ class AnnliteIndexer(Executor):
         """
         super().__init__(*args, **kwargs)
         self.logger = JinaLogger(self.__class__.__name__)
-
-        assert n_dim > 0, 'Please specify a positive dimension of the vectors to index!'
-
         super().__init__(**kwargs)
 
         config = {'n_dim': n_dim,
@@ -50,7 +47,7 @@ class AnnliteIndexer(Executor):
 
 
     @requests(on='/index')
-    def index(self, docs: DocumentArray, **kwargs):
+    def index(self, docs: DocumentArray):
 
         if docs:
             self._index.extend(docs)
@@ -68,10 +65,10 @@ class AnnliteIndexer(Executor):
         :param parameters: the runtime arguments to `DocumentArray`'s match
         function. They overwrite the original match_args arguments.
         """
-        docs.match(self._index)
+        docs.match(self._index, parameters=parameters)
 
     @requests(on='/delete')
-    def delete(self, parameters: Dict, **kwargs):
+    def delete(self, parameters: Dict):
         """
         Delete entries from the index by id
         :param parameters: parameters to the request
@@ -83,7 +80,7 @@ class AnnliteIndexer(Executor):
         del self._index[deleted_ids]
 
     @requests(on='/update')
-    def update(self, docs: DocumentArray, **kwargs):
+    def update(self, docs: DocumentArray):
         """
         Update doc with the same id, if not present, append into storage
         :param docs: the documents to update
@@ -98,7 +95,7 @@ class AnnliteIndexer(Executor):
                 )
 
     @requests(on='/fill_embedding')
-    def fill_embedding(self, docs: DocumentArray, **kwargs):
+    def fill_embedding(self, docs: DocumentArray):
         """
         retrieve embedding of Documents by id
         :param docs: DocumentArray to search with
@@ -107,7 +104,7 @@ class AnnliteIndexer(Executor):
             doc.embedding = self._index[doc.id].embedding
 
     @requests(on='/clear')
-    def clear(self, **kwargs):
+    def clear(self):
         """
         clear the database
         """
