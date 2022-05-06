@@ -53,7 +53,6 @@ class AnnliteIndexer(Executor):
     def index(self, docs: DocumentArray, **kwargs):
 
         if docs:
-            #with self._index:
             self._index.extend(docs)
 
     @requests(on='/search')

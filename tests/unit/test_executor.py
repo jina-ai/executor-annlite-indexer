@@ -88,10 +88,8 @@ def test_fill_embeddings():
         annlite_index.fill_embedding(DocumentArray([Document(id='b')]))
 
 
-def test_persistence(docs):
-    from tempfile import TemporaryDirectory
-    data_path = TemporaryDirectory().name
-
+def test_persistence(docs, tmpdir):
+    data_path = str(tmpdir)
 
     annlite_index1 = AnnliteIndexer(metric='euclidean', n_dim=128, data_path=data_path)
     annlite_index1.index(docs)
