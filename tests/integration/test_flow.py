@@ -35,7 +35,10 @@ def test_reload_keep_state(tmpdir):
     with f:
         f.index(docs)
         first_search = f.search(inputs=docs)
+        first_matches = first_search[0].matches
 
     with f:
         second_search = f.search(inputs=docs)
-        assert len(first_search[0].matches) == len(second_search[0].matches)
+        second_matches == second_search[0].matches
+
+    assert first_matches == second_matches
