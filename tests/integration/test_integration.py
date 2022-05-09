@@ -29,6 +29,7 @@ def test_flow(tmpdir):
 
 
 def test_reload_keep_state(tmpdir):
+
     docs = DocumentArray([Document(embedding=np.random.rand(3)) for _ in range(2)])
     f = Flow().add(uses=AnnliteIndexer, uses_with={'data_path': str(tmpdir), 'n_dim': 3}, )
 
@@ -39,6 +40,6 @@ def test_reload_keep_state(tmpdir):
 
     with f:
         second_search = f.search(inputs=docs)
-        second_matches == second_search[0].matches
+        second_matches = second_search[0].matches
 
     assert first_matches == second_matches
