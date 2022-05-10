@@ -7,7 +7,7 @@ from jina.logging.logger import JinaLogger
 class AnnliteIndexer(Executor):
     def __init__(
         self,
-        n_dim: int = 2,
+        n_dim: int = 128,
         metric: str = 'cosine',
         data_path: str = 'Persisted',
         ef_construction: Optional[int] = None,
