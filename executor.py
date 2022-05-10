@@ -7,25 +7,25 @@ from jina.logging.logger import JinaLogger
 class AnnliteIndexer(Executor):
     def __init__(
         self,
-        n_dim=2,
+        n_dim: int = 2,
         metric: str = 'cosine',
-        ef_construction: int = 200,
-        ef_search: int = 50,
-        max_connection: int = 16,
-        data_path: Optional[str] = None,
+        data_path: str = 'Persisted',
+        ef_construction: Optional[int] = None,
+        ef_search: Optional[int] = None,
+        max_connection: Optional[int] = None,
         *args,
         **kwargs,
     ):
         """
         :param n_dim: Dimensionality of vectors to index
         :param metric: Distance metric type. Can be 'euclidean', 'inner_product', or 'cosine'
+        :param data_path: Path of the folder where to store indexed data.
         :param max_connection: The maximum number of outgoing connections in the graph (the "M" parameter)
         :param include_metadata: If True, return the document metadata in response
         :param ef_construction: The construction time/accuracy trade-off
         :param ef_search: The query time accuracy/speed trade-off
         :param index_traversal_paths: Default traversal paths on docs
                 (used for indexing, delete and update), e.g. '@r', '@c', '@r,c'
-        :param data_path: Path of the folder where to store indexed data.
         """
         super().__init__(*args, **kwargs)
         self.logger = JinaLogger(self.__class__.__name__)
@@ -60,7 +60,6 @@ class AnnliteIndexer(Executor):
         function. They overwrite the original match_args arguments.
         """
         docs.match(self._index)
-        return docs
 
     @requests(on='/delete')
     def delete(self, parameters: Dict, **kwargs):
