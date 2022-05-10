@@ -38,22 +38,22 @@ def update_docs():
     )
 
 
-def test_init():
-    annlite_index = AnnliteIndexer(metric='euclidean', n_dim=10)
+def test_init(tmpdir):
+    annlite_index = AnnliteIndexer(data_path=str(tmpdir), metric='euclidean', n_dim=10)
 
     assert isinstance(annlite_index._index, DocumentArrayAnnlite)
     assert annlite_index._index._config.metric == 'euclidean'
     assert annlite_index._index._config.n_dim == 10
 
 
-def test_index(docs):
-    annlite_index = AnnliteIndexer(metric='euclidean', n_dim=128)
+def test_index(docs, tmpdir):
+    annlite_index = AnnliteIndexer(data_path=str(tmpdir), metric='euclidean', n_dim=128)
     annlite_index.index(docs)
     assert len(annlite_index._index) == len(docs)
 
 
-def test_delete(docs):
-    annlite_index = AnnliteIndexer(metric='euclidean', n_dim=128)
+def test_delete(docs, tmpdir):
+    annlite_index = AnnliteIndexer(data_path=str(tmpdir), metric='euclidean', n_dim=128)
     annlite_index.index(docs)
 
     ids = ['doc1', 'doc2', 'doc3']
@@ -63,9 +63,9 @@ def test_delete(docs):
         assert doc_id not in annlite_index._index
 
 
-def test_update(docs, update_docs):
+def test_update(docs, update_docs, tmpdir):
     # index docs first
-    annlite_index = AnnliteIndexer(metric='euclidean', n_dim=128)
+    annlite_index = AnnliteIndexer(data_path=str(tmpdir), metric='euclidean', n_dim=128)
     annlite_index.index(docs)
     assert_document_arrays_equal(annlite_index._index, docs)
 
@@ -75,8 +75,8 @@ def test_update(docs, update_docs):
     assert annlite_index._index['doc1'].text == 'modified'
 
 
-def test_fill_embeddings():
-    annlite_index = AnnliteIndexer(metric='euclidean', n_dim=1)
+def test_fill_embeddings(tmpdir):
+    annlite_index = AnnliteIndexer(data_path=str(tmpdir), metric='euclidean', n_dim=1)
 
     annlite_index.index(DocumentArray([Document(id='a', embedding=np.array([1]))]))
     search_docs = DocumentArray([Document(id='a')])
@@ -101,9 +101,9 @@ def test_persistence(docs, tmpdir):
     'metric, metric_name',
     [('euclidean', 'euclid_similarity'), ('cosine', 'cosine_similarity')],
 )
-def test_search(metric, metric_name, docs):
+def test_search(metric, metric_name, docs, tmpdir):
     # test general/normal case
-    indexer = AnnliteIndexer(metric=metric, n_dim=128)
+    indexer = AnnliteIndexer(data_path=str(tmpdir), metric=metric, n_dim=128)
     indexer.index(docs)
     query = DocumentArray([Document(embedding=np.random.rand(128)) for _ in range(10)])
     indexer.search(query)
