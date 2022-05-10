@@ -1,7 +1,8 @@
 
 # AnnliteIndexer
 
-AnnliteIndexer indexes Documents into a DocumentArray  with ` `storage='annlite'`
+AnnliteIndexer indexes Documents into a `DocumentArray`  using `storage='annlite'`. Underneath, the `DocumentArray`  uses 
+ [AnnLite](https://github.com/jina-ai/annlite) to store and search Documents efficiently. 
 
 ## Usage
 
@@ -25,7 +26,7 @@ f = Flow().add(uses='jinahub://AnnliteIndexer')
 - To override class metas, use `.add(..., uses_metas: {'key': 'value})`
 
 
-#### tests
+## tests
 
 
 Test can be run setting the `PYTHONPATH` into the root of this repository
