@@ -47,13 +47,13 @@ def test_init(tmpdir):
 
 
 def test_index(docs, tmpdir):
-    annlite_index = AnnliteIndexer(data_path=str(tmpdir), metric='euclidean', n_dim=128)
+    annlite_index = AnnliteIndexer(data_path=str(tmpdir), metric='euclidean')
     annlite_index.index(docs)
     assert len(annlite_index._index) == len(docs)
 
 
 def test_delete(docs, tmpdir):
-    annlite_index = AnnliteIndexer(data_path=str(tmpdir), metric='euclidean', n_dim=128)
+    annlite_index = AnnliteIndexer(data_path=str(tmpdir), metric='euclidean')
     annlite_index.index(docs)
 
     ids = ['doc1', 'doc2', 'doc3']
@@ -65,7 +65,7 @@ def test_delete(docs, tmpdir):
 
 def test_update(docs, update_docs, tmpdir):
     # index docs first
-    annlite_index = AnnliteIndexer(data_path=str(tmpdir), metric='euclidean', n_dim=128)
+    annlite_index = AnnliteIndexer(data_path=str(tmpdir), metric='euclidean')
     annlite_index.index(docs)
     assert_document_arrays_equal(annlite_index._index, docs)
 
@@ -91,9 +91,9 @@ def test_fill_embeddings(tmpdir):
 def test_persistence(docs, tmpdir):
     data_path = str(tmpdir)
 
-    annlite_index1 = AnnliteIndexer(metric='euclidean', n_dim=128, data_path=data_path)
+    annlite_index1 = AnnliteIndexer(metric='euclidean', data_path=data_path)
     annlite_index1.index(docs)
-    annlite_index2 = AnnliteIndexer(metric='euclidean', n_dim=128, data_path=data_path)
+    annlite_index2 = AnnliteIndexer(metric='euclidean', data_path=data_path)
     assert_document_arrays_equal(annlite_index2._index, docs)
 
 
@@ -103,7 +103,7 @@ def test_persistence(docs, tmpdir):
 )
 def test_search(metric, metric_name, docs, tmpdir):
     # test general/normal case
-    indexer = AnnliteIndexer(data_path=str(tmpdir), metric=metric, n_dim=128)
+    indexer = AnnliteIndexer(data_path=str(tmpdir), metric=metric)
     indexer.index(docs)
     query = DocumentArray([Document(embedding=np.random.rand(128)) for _ in range(10)])
     indexer.search(query)
@@ -111,3 +111,11 @@ def test_search(metric, metric_name, docs, tmpdir):
     for doc in query:
         similarities = [t[metric_name].value for t in doc.matches[:, 'scores']]
         assert sorted(similarities, reverse=True) == similarities
+
+
+def test_clear(docs, docker_compose, tmpdir):
+    indexer = AnnliteIndexer(data_path=str(tmpdir))
+    indexer.index(docs)
+    assert len(indexer._index) == 6
+    indexer.clear()
+    assert len(indexer._index) == 0
