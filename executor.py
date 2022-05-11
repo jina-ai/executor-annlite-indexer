@@ -103,3 +103,7 @@ class AnnliteIndexer(Executor):
         clear the database
         """
         self._index.clear()
+
+    def close(self) -> None:
+        super().close()
+        del self._index
