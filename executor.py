@@ -1,5 +1,5 @@
 from jina import Executor, requests
-from typing import Optional, Dict
+from typing import Optional, Dict, List, Tuple
 from docarray import Document, DocumentArray
 from jina.logging.logger import JinaLogger
 
@@ -7,73 +7,40 @@ from jina.logging.logger import JinaLogger
 class AnnliteIndexer(Executor):
     def __init__(
         self,
-        dim: int = 0,
+        n_dim: int = 128,
         metric: str = 'cosine',
-        limit: int = 10,
-        ef_construction: int = 200,
-        ef_query: int = 50,
-        max_connection: int = 16,
-        include_metadata: bool = True,
-        index_traversal_paths: str = '@r',
-        search_traversal_paths: str = '@r',
-        columns: Optional[List[Tuple[str, str]]] = None,
-        serialize_config: Optional[Dict] = None,
+        data_path: str = 'Persisted',
+        ef_construction: Optional[int] = None,
+        ef_search: Optional[int] = None,
+        max_connection: Optional[int] = None,
         *args,
         **kwargs,
     ):
         """
-        :param dim: Dimensionality of vectors to index
+        :param n_dim: Dimensionality of vectors to index
         :param metric: Distance metric type. Can be 'euclidean', 'inner_product', or 'cosine'
+        :param data_path: Path of the folder where to store indexed data.
+        :param max_connection: The maximum number of outgoing connections in the graph (the "M" parameter)
         :param include_metadata: If True, return the document metadata in response
-        :param limit: Number of results to get for each query document in search
         :param ef_construction: The construction time/accuracy trade-off
-        :param ef_query: The query time accuracy/speed trade-off
-        :param max_connection: The maximum number of outgoing connections in the
-            graph (the "M" parameter)
+        :param ef_search: The query time accuracy/speed trade-off
         :param index_traversal_paths: Default traversal paths on docs
                 (used for indexing, delete and update), e.g. '@r', '@c', '@r,c'
-        :param search_traversal_paths: Default traversal paths on docs
-        (used for search), e.g. '@r', '@c', '@r,c'
-        :param columns: List of tuples of the form (column_name, str_type). Here str_type must be a string that can be
-                parsed as a valid Python type.
-        :param serialize_config: The configurations used for serializing documents, e.g., {'protocol': 'pickle'}
         """
         super().__init__(*args, **kwargs)
         self.logger = JinaLogger(self.__class__.__name__)
-
-        assert dim > 0, 'Please specify the dimension of the vectors to index!'
-
-        self.metric = metric
-        self.limit = limit
-        self.include_metadata = include_metadata
-        self.index_traversal_paths = index_traversal_paths
-        self.search_traversal_paths = search_traversal_paths
-        self._valid_input_columns = ['str', 'float', 'int']
-
-        if columns:
-            cols = []
-            for n, t in columns:
-                assert (
-                    t in self._valid_input_columns
-                ), f'column of type={t} is not supported. Supported types are {self._valid_input_columns}'
-                cols.append((n, eval(t)))
-            columns = cols
-
         super().__init__(**kwargs)
 
-        self._index = DocumentArray(
-            storage='annlite',
-            config={
-                'n_dim': n_dim,
-                'distance': distance,
-                'ef_construct': ef_construct,
-                'max_connection': max_connection,
-                'data_path'= './workspace'
-            },
-        )
+        config = {'n_dim': n_dim,
+                  'metric': metric,
+                  'ef_construction': ef_construction,
+                  'ef_search': ef_search,
+                  'max_connection': max_connection,
+                  'data_path': data_path}
 
-
+        self._index = DocumentArray(storage='annlite', config=config)
         self.logger = JinaLogger(self.metas.name)
+
 
     @requests(on='/index')
     def index(self, docs: DocumentArray, **kwargs):
@@ -85,13 +52,11 @@ class AnnliteIndexer(Executor):
     def search(
         self,
         docs: 'DocumentArray',
-        parameters: Optional[Dict] = None,
         **kwargs,
     ):
         """
         Perform a vector similarity search and retrieve the full Document match
         :param docs: the Documents to search with
-        :param parameters: the runtime arguments to `DocumentArray`'s match
         function. They overwrite the original match_args arguments.
         """
         docs.match(self._index)
@@ -105,6 +70,7 @@ class AnnliteIndexer(Executor):
         deleted_ids = parameters.get('ids', [])
         if len(deleted_ids) == 0:
             return
+
         del self._index[deleted_ids]
 
     @requests(on='/update')
@@ -137,3 +103,7 @@ class AnnliteIndexer(Executor):
         clear the database
         """
         self._index.clear()
+
+    def close(self) -> None:
+        super().close()
+        del self._index
