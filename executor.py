@@ -13,6 +13,7 @@ class AnnliteIndexer(Executor):
         ef_construction: Optional[int] = None,
         ef_search: Optional[int] = None,
         max_connection: Optional[int] = None,
+        columns: Optional[List[Tuple[str, str]]] = None,
         *args,
         **kwargs,
     ):
@@ -26,21 +27,24 @@ class AnnliteIndexer(Executor):
         :param ef_search: The query time accuracy/speed trade-off
         :param index_traversal_paths: Default traversal paths on docs
                 (used for indexing, delete and update), e.g. '@r', '@c', '@r,c'
+        :param columns: precise columns for the Indexer (used for filtering).
         """
         super().__init__(*args, **kwargs)
         self.logger = JinaLogger(self.__class__.__name__)
         super().__init__(**kwargs)
 
-        config = {'n_dim': n_dim,
-                  'metric': metric,
-                  'ef_construction': ef_construction,
-                  'ef_search': ef_search,
-                  'max_connection': max_connection,
-                  'data_path': data_path}
+        config = {
+            'n_dim': n_dim,
+            'metric': metric,
+            'ef_construction': ef_construction,
+            'ef_search': ef_search,
+            'max_connection': max_connection,
+            'data_path': data_path,
+            'columns': columns,
+        }
 
         self._index = DocumentArray(storage='annlite', config=config)
         self.logger = JinaLogger(self.metas.name)
-
 
     @requests(on='/index')
     def index(self, docs: DocumentArray, **kwargs):
@@ -52,14 +56,17 @@ class AnnliteIndexer(Executor):
     def search(
         self,
         docs: 'DocumentArray',
+        parameters: Dict = {},
         **kwargs,
     ):
-        """
-        Perform a vector similarity search and retrieve the full Document match
+        """Perform a vector similarity search and retrieve the full Document match
+
         :param docs: the Documents to search with
-        function. They overwrite the original match_args arguments.
+        :param parameters: Dictionary to define the `filter` that you want to use.
+        :param kwargs: additional kwargs for the endpoint
+
         """
-        docs.match(self._index)
+        docs.match(self._index, filter=parameters.get('filter', None))
 
     @requests(on='/delete')
     def delete(self, parameters: Dict, **kwargs):

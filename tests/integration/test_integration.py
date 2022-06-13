@@ -1,3 +1,5 @@
+import operator
+
 import numpy as np
 import pytest
 from docarray import Document, DocumentArray
@@ -22,16 +24,21 @@ def test_flow(tmpdir):
                 Document(id='d', embedding=np.array([2, 3])),
             ],
         )
-        docs = f.post(on='/search', inputs=[Document(embedding=np.array([1, 1]))],)
+        docs = f.post(
+            on='/search',
+            inputs=[Document(embedding=np.array([1, 1]))],
+        )
 
     assert docs[0].matches[0].id == 'b'
-
 
 
 def test_reload_keep_state(tmpdir):
 
     docs = DocumentArray([Document(embedding=np.random.rand(3)) for _ in range(2)])
-    f = Flow().add(uses=AnnliteIndexer, uses_with={'data_path': str(tmpdir), 'n_dim': 3}, )
+    f = Flow().add(
+        uses=AnnliteIndexer,
+        uses_with={'data_path': str(tmpdir), 'n_dim': 3},
+    )
 
     with f:
         f.index(docs)
@@ -43,3 +50,52 @@ def test_reload_keep_state(tmpdir):
         second_matches = second_search[0].matches
 
     assert first_matches == second_matches
+
+
+numeric_operators_annlite = {
+    '$gte': operator.ge,
+    '$gt': operator.gt,
+    '$lte': operator.le,
+    '$lt': operator.lt,
+    '$eq': operator.eq,
+    '$neq': operator.ne,
+}
+
+
+@pytest.mark.parametrize('operator', list(numeric_operators_annlite.keys()))
+def test_filtering(docker_compose, tmpdir, operator: str):
+    n_dim = 256
+
+    f = Flow().add(
+        uses=AnnliteIndexer,
+        uses_with={
+            'data_path': str(tmpdir),
+            'n_dim': n_dim,
+            'columns': [('price', 'float')],
+        },
+    )
+
+    docs = DocumentArray(
+        [
+            Document(id=f'r{i}', embedding=np.random.rand(n_dim), tags={'price': i})
+            for i in range(50)
+        ]
+    )
+    with f:
+
+        f.index(docs)
+
+        for threshold in [10, 20, 30]:
+            filter_ = {'price': {operator: threshold}}
+
+            doc_query = DocumentArray([Document(embedding=np.random.rand(n_dim))])
+            indexed_docs = f.search(doc_query, parameters={'filter': filter_})
+
+            assert len(indexed_docs[0].matches) > 0
+
+            assert all(
+                [
+                    numeric_operators_annlite[operator](r.tags['price'], threshold)
+                    for r in indexed_docs[0].matches
+                ]
+            )

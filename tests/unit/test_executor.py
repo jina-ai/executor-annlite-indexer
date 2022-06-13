@@ -1,3 +1,5 @@
+import operator
+
 import pytest
 from docarray.array.annlite import DocumentArrayAnnlite
 from docarray import Document, DocumentArray
@@ -119,3 +121,63 @@ def test_clear(docs, docker_compose, tmpdir):
     assert len(indexer._index) == 6
     indexer.clear()
     assert len(indexer._index) == 0
+
+
+@pytest.mark.parametrize('type_', ['int', 'float'])
+def test_columns(docker_compose, tmpdir, type_):
+    n_dim = 3
+    indexer = AnnliteIndexer(
+        data_path=str(tmpdir), n_dim=n_dim, columns=[('price', type_)]
+    )
+
+    docs = DocumentArray(
+        [
+            Document(id=f'r{i}', embedding=i * np.ones(n_dim), tags={'price': i})
+            for i in range(10)
+        ]
+    )
+    indexer.index(docs)
+    assert len(indexer._index) == 10
+
+
+numeric_operators_annlite = {
+    '$gte': operator.ge,
+    '$gt': operator.gt,
+    '$lte': operator.le,
+    '$lt': operator.lt,
+    '$eq': operator.eq,
+    '$neq': operator.ne,
+}
+
+
+@pytest.mark.parametrize('operator', list(numeric_operators_annlite.keys()))
+def test_filtering(docker_compose, tmpdir, operator: str):
+    n_dim = 256
+
+    indexer = AnnliteIndexer(
+        data_path=str(tmpdir), n_dim=n_dim, columns=[('price', 'float')]
+    )
+
+    docs = DocumentArray(
+        [
+            Document(id=f'r{i}', embedding=np.random.rand(n_dim), tags={'price': i})
+            for i in range(50)
+        ]
+    )
+    indexer.index(docs)
+
+    for threshold in [10, 20, 30]:
+
+        filter_ = {'price': {operator: threshold}}
+
+        doc_query = DocumentArray([Document(embedding=np.random.rand(n_dim))])
+        indexer.search(doc_query, parameters={'filter': filter_})
+
+        assert len(doc_query[0].matches)
+
+        assert all(
+            [
+                numeric_operators_annlite[operator](r.tags['price'], threshold)
+                for r in doc_query[0].matches
+            ]
+        )

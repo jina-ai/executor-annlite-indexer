@@ -1,1 +1,1 @@
-docarray[annlite]>=0.13.8
+docarray[annlite]>=0.13.20
