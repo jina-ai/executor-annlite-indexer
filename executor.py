@@ -14,6 +14,9 @@ class AnnLiteIndexer(Executor):
         ef_construction: Optional[int] = None,
         ef_search: Optional[int] = None,
         max_connection: Optional[int] = None,
+        include_metadata: bool = True,
+        index_traversal_paths: str = '@r',
+        search_traversal_paths: str = '@r',
         columns: Optional[List[Tuple[str, str]]] = None,
         *args,
         **kwargs,
@@ -29,11 +32,16 @@ class AnnLiteIndexer(Executor):
         :param ef_search: The query time accuracy/speed trade-off
         :param index_traversal_paths: Default traversal paths on docs
                 (used for indexing, delete and update), e.g. '@r', '@c', '@r,c'
+        :param search_traversal_paths: Default traversal paths on docs
+        (used for search), e.g. '@r', '@c', '@r,c'
         :param columns: precise columns for the Indexer (used for filtering).
         """
         super().__init__(*args, **kwargs)
         self.logger = JinaLogger(self.__class__.__name__)
         self.limit = limit
+        self.include_metadata = include_metadata
+        self.index_traversal_paths = index_traversal_paths
+        self.search_traversal_paths = search_traversal_paths
 
         config = {
             'n_dim': n_dim,
@@ -48,10 +56,19 @@ class AnnLiteIndexer(Executor):
         self._index = DocumentArray(storage='annlite', config=config)
 
     @requests(on='/index')
-    def index(self, docs: DocumentArray, **kwargs):
+    def index(self, docs: DocumentArray, parameters: dict = {}, **kwargs):
+        """Index new documents
+        :param docs: the Documents to index
+        :param parameters: dictionary with options for indexing
+        Keys accepted:
+            - 'traversal_paths' (str): traversal path for the docs
+        """
+        traversal_paths = parameters.get('traversal_paths', self.index_traversal_paths)
+        flat_docs = docs[traversal_paths]
+        if len(flat_docs) == 0:
+            return
 
-        if docs:
-            self._index.extend(docs)
+        self._index.extend(flat_docs)
 
     @requests(on='/search')
     def search(
@@ -90,13 +107,22 @@ class AnnLiteIndexer(Executor):
         del self._index[deleted_ids]
 
     @requests(on='/update')
-    def update(self, docs: DocumentArray, **kwargs):
+    def update(self, docs: DocumentArray, parameters: dict = {}, **kwargs):
+        """Update existing documents
+        :param docs: the Documents to update
+        :param parameters: dictionary with options for updating
+        Keys accepted:
+            - 'traversal_paths' (str): traversal path for the docs
         """
-        Update doc with the same id, if not present, append into storage
-        :param docs: the documents to update
-        """
+        if not docs:
+            return
 
-        for doc in docs:
+        traversal_paths = parameters.get('traversal_paths', self.index_traversal_paths)
+        flat_docs = docs[traversal_paths]
+        if len(flat_docs) == 0:
+            return
+
+        for doc in flat_docs:
             try:
                 self._index[doc.id] = doc
             except IndexError:
