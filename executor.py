@@ -110,6 +110,16 @@ class AnnLiteIndexer(Executor):
         """
         return self._index.find(parameters.get('filter', None))
 
+    @requests(on='/status')
+    def status(self, **kwargs) -> DocumentArray:
+        """Return the document containing status information about the indexer.
+        The status will contain information on the total number of indexed and deleted
+        documents, and on the number of (searchable) documents currently in the index.
+        """
+
+        status = Document(tags=self._index._annlite.stat)
+        return DocumentArray([status])
+
     @requests(on='/clear')
     def clear(self, **kwargs):
         """
