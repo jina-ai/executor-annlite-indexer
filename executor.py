@@ -9,7 +9,6 @@ class AnnliteIndexer(Executor):
         self,
         n_dim: int = 128,
         metric: str = 'cosine',
-        data_path: str = 'Persisted',
         ef_construction: Optional[int] = None,
         ef_search: Optional[int] = None,
         max_connection: Optional[int] = None,
@@ -20,7 +19,6 @@ class AnnliteIndexer(Executor):
         """
         :param n_dim: Dimensionality of vectors to index
         :param metric: Distance metric type. Can be 'euclidean', 'inner_product', or 'cosine'
-        :param data_path: Path of the folder where to store indexed data.
         :param max_connection: The maximum number of outgoing connections in the graph (the "M" parameter)
         :param include_metadata: If True, return the document metadata in response
         :param ef_construction: The construction time/accuracy trade-off
@@ -39,7 +37,7 @@ class AnnliteIndexer(Executor):
             'ef_construction': ef_construction,
             'ef_search': ef_search,
             'max_connection': max_connection,
-            'data_path': data_path,
+            'data_path': self.workspace or './workspace',
             'columns': columns,
         }
 
