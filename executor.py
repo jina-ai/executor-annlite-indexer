@@ -9,6 +9,7 @@ class AnnLiteIndexer(Executor):
         self,
         n_dim: int = 128,
         metric: str = 'cosine',
+        limit: int = 10,
         data_path: Optional[str] = None,
         ef_construction: Optional[int] = None,
         ef_search: Optional[int] = None,
@@ -20,6 +21,7 @@ class AnnLiteIndexer(Executor):
         """
         :param n_dim: Dimensionality of vectors to index
         :param metric: Distance metric type. Can be 'euclidean', 'inner_product', or 'cosine'
+        :param limit: Number of results to get for each query document in search
         :param data_path: Path of the folder where to store indexed data.
         :param max_connection: The maximum number of outgoing connections in the graph (the "M" parameter)
         :param include_metadata: If True, return the document metadata in response
@@ -31,7 +33,7 @@ class AnnLiteIndexer(Executor):
         """
         super().__init__(*args, **kwargs)
         self.logger = JinaLogger(self.__class__.__name__)
-        super().__init__(**kwargs)
+        self.limit = limit
 
         config = {
             'n_dim': n_dim,
@@ -61,11 +63,19 @@ class AnnLiteIndexer(Executor):
         """Perform a vector similarity search and retrieve the full Document match
 
         :param docs: the Documents to search with
-        :param parameters: Dictionary to define the `filter` that you want to use.
+        :param parameters: dictionary for parameters for the search operation
+        Keys accepted:
+            - 'filter' (dict): the filtering conditions on document tags
+            - 'traversal_paths' (str): traversal paths for the docs
+            - 'limit' (int): nr of matches to get per Document
         :param kwargs: additional kwargs for the endpoint
 
         """
-        docs.match(self._index, filter=parameters.get('filter', None))
+        if not docs:
+            return
+
+        limit = int(parameters.get('limit', self.limit))
+        docs.match(self._index, filter=parameters.get('filter', None), limit=limit)
 
     @requests(on='/delete')
     def delete(self, parameters: Dict, **kwargs):
