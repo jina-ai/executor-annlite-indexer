@@ -1,7 +1,7 @@
 
-# AnnliteIndexer
+# AnnLiteIndexer
 
-AnnliteIndexer indexes Documents into a `DocumentArray`  using `storage='annlite'`. Underneath, the `DocumentArray`  uses 
+AnnLiteIndexer indexes Documents into a `DocumentArray`  using `storage='annlite'`. Underneath, the `DocumentArray`  uses 
  [AnnLite](https://github.com/jina-ai/annlite) to store and search Documents efficiently. 
 
 ## Usage
@@ -11,7 +11,7 @@ AnnliteIndexer indexes Documents into a `DocumentArray`  using `storage='annlite
 ```python
 from jina import Flow
 	
-f = Flow().add(uses='jinahub+docker://AnnliteIndexer')
+f = Flow().add(uses='jinahub+docker://AnnLiteIndexer')
 ```
 
 #### via source code
@@ -19,7 +19,7 @@ f = Flow().add(uses='jinahub+docker://AnnliteIndexer')
 ```python
 from jina import Flow
 	
-f = Flow().add(uses='jinahub://AnnliteIndexer')
+f = Flow().add(uses='jinahub://AnnLiteIndexer')
 ```
 
 - To override `__init__` args & kwargs, use `.add(..., uses_with: {'key': 'value'})`
@@ -37,7 +37,7 @@ from docarray import Document
 import numpy as np
 
 f = Flow().add(
-         uses='jinahub://AnnliteIndexer',
+         uses='jinahub://AnnLiteIndexer',
          uses_with={'n_dim': 2},
      )
 
@@ -70,7 +70,7 @@ For instance :
 from jina import Flow
 
 f = Flow().add(
-    uses='jinahub+docker://AnnliteIndexer',
+    uses='jinahub+docker://AnnLiteIndexer',
     uses_with={
         'data_path': 'data_path/',
         'n_dim': 256,
@@ -102,7 +102,7 @@ with f:
 ```
 
 ### Using filtering in search
-To do filtering with the AnnliteIndexer you should first define columns and precise the dimension of your embedding space.
+To do filtering with the AnnLiteIndexer you should first define columns and precise the dimension of your embedding space.
 
 For instance :
 
@@ -110,7 +110,7 @@ For instance :
 from jina import Flow
 
 f = Flow().add(
-    uses='jinahub+docker://AnnliteIndexer',
+    uses='jinahub+docker://AnnLiteIndexer',
     uses_with={
         'data_path': 'data_path/',
         'n_dim': 256,

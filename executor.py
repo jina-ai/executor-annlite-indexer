@@ -4,7 +4,7 @@ from docarray import Document, DocumentArray
 from jina.logging.logger import JinaLogger
 
 
-class AnnliteIndexer(Executor):
+class AnnLiteIndexer(Executor):
     def __init__(
         self,
         n_dim: int = 128,

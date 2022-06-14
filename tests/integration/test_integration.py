@@ -5,12 +5,12 @@ import pytest
 from docarray import Document, DocumentArray
 from jina import Flow
 
-from executor import AnnliteIndexer
+from executor import AnnLiteIndexer
 
 
 def test_flow(tmpdir):
     f = Flow().add(
-        uses=AnnliteIndexer,
+        uses=AnnLiteIndexer,
         uses_with={'data_path': str(tmpdir), 'n_dim': 2, 'metric': 'euclidean'},
     )
 
@@ -36,7 +36,7 @@ def test_reload_keep_state(tmpdir):
 
     docs = DocumentArray([Document(embedding=np.random.rand(3)) for _ in range(2)])
     f = Flow().add(
-        uses=AnnliteIndexer,
+        uses=AnnLiteIndexer,
         uses_with={'data_path': str(tmpdir), 'n_dim': 3},
     )
 
@@ -56,7 +56,7 @@ def test_filter(tmpdir):
     n_dim = 3
 
     f = Flow().add(
-        uses=AnnliteIndexer,
+        uses=AnnLiteIndexer,
         uses_with={
             'data_path': str(tmpdir),
             'n_dim': n_dim,
@@ -94,7 +94,7 @@ def test_filtering(docker_compose, tmpdir, operator: str):
     n_dim = 256
 
     f = Flow().add(
-        uses=AnnliteIndexer,
+        uses=AnnLiteIndexer,
         uses_with={
             'data_path': str(tmpdir),
             'n_dim': n_dim,

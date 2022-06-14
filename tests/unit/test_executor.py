@@ -5,7 +5,7 @@ from docarray.array.annlite import DocumentArrayAnnlite
 from docarray import Document, DocumentArray
 
 import numpy as np
-from executor import AnnliteIndexer
+from executor import AnnLiteIndexer
 
 
 def assert_document_arrays_equal(arr1, arr2):
@@ -41,7 +41,7 @@ def update_docs():
 
 
 def test_init(tmpdir):
-    annlite_index = AnnliteIndexer(data_path=str(tmpdir), metric='euclidean', n_dim=10)
+    annlite_index = AnnLiteIndexer(data_path=str(tmpdir), metric='euclidean', n_dim=10)
 
     assert isinstance(annlite_index._index, DocumentArrayAnnlite)
     assert annlite_index._index._config.metric == 'euclidean'
@@ -49,13 +49,13 @@ def test_init(tmpdir):
 
 
 def test_index(docs, tmpdir):
-    annlite_index = AnnliteIndexer(data_path=str(tmpdir), metric='euclidean')
+    annlite_index = AnnLiteIndexer(data_path=str(tmpdir), metric='euclidean')
     annlite_index.index(docs)
     assert len(annlite_index._index) == len(docs)
 
 
 def test_delete(docs, tmpdir):
-    annlite_index = AnnliteIndexer(data_path=str(tmpdir), metric='euclidean')
+    annlite_index = AnnLiteIndexer(data_path=str(tmpdir), metric='euclidean')
     annlite_index.index(docs)
 
     ids = ['doc1', 'doc2', 'doc3']
@@ -67,7 +67,7 @@ def test_delete(docs, tmpdir):
 
 def test_update(docs, update_docs, tmpdir):
     # index docs first
-    annlite_index = AnnliteIndexer(data_path=str(tmpdir), metric='euclidean')
+    annlite_index = AnnLiteIndexer(data_path=str(tmpdir), metric='euclidean')
     annlite_index.index(docs)
     assert_document_arrays_equal(annlite_index._index, docs)
 
@@ -78,7 +78,7 @@ def test_update(docs, update_docs, tmpdir):
 
 
 def test_fill_embeddings(tmpdir):
-    annlite_index = AnnliteIndexer(data_path=str(tmpdir), metric='euclidean', n_dim=1)
+    annlite_index = AnnLiteIndexer(data_path=str(tmpdir), metric='euclidean', n_dim=1)
 
     annlite_index.index(DocumentArray([Document(id='a', embedding=np.array([1]))]))
     search_docs = DocumentArray([Document(id='a')])
@@ -93,9 +93,9 @@ def test_fill_embeddings(tmpdir):
 def test_persistence(docs, tmpdir):
     data_path = str(tmpdir)
 
-    annlite_index1 = AnnliteIndexer(metric='euclidean', data_path=data_path)
+    annlite_index1 = AnnLiteIndexer(metric='euclidean', data_path=data_path)
     annlite_index1.index(docs)
-    annlite_index2 = AnnliteIndexer(metric='euclidean', data_path=data_path)
+    annlite_index2 = AnnLiteIndexer(metric='euclidean', data_path=data_path)
     assert_document_arrays_equal(annlite_index2._index, docs)
 
 
@@ -105,7 +105,7 @@ def test_persistence(docs, tmpdir):
 )
 def test_search(metric, metric_name, docs, tmpdir):
     # test general/normal case
-    indexer = AnnliteIndexer(data_path=str(tmpdir), metric=metric)
+    indexer = AnnLiteIndexer(data_path=str(tmpdir), metric=metric)
     indexer.index(docs)
     query = DocumentArray([Document(embedding=np.random.rand(128)) for _ in range(10)])
     indexer.search(query)
@@ -120,7 +120,7 @@ def test_filter(tmpdir):
 
 
     docs = DocumentArray([Document(id=f'r{i}', tags={'price': i}) for i in range(10)])
-    indexer = AnnliteIndexer(
+    indexer = AnnLiteIndexer(
         data_path=str(tmpdir), n_dim=n_dim, columns=[('price', 'float')]
     )
 
@@ -136,7 +136,7 @@ def test_filter(tmpdir):
     assert result[0].tags['price'] == max_price
 
 def test_clear(docs, tmpdir):
-    indexer = AnnliteIndexer(data_path=str(tmpdir))
+    indexer = AnnLiteIndexer(data_path=str(tmpdir))
     indexer.index(docs)
     assert len(indexer._index) == 6
     indexer.clear()
@@ -146,7 +146,7 @@ def test_clear(docs, tmpdir):
 @pytest.mark.parametrize('type_', ['int', 'float'])
 def test_columns(tmpdir, type_):
     n_dim = 3
-    indexer = AnnliteIndexer(
+    indexer = AnnLiteIndexer(
         data_path=str(tmpdir), n_dim=n_dim, columns=[('price', type_)]
     )
 
@@ -174,7 +174,7 @@ numeric_operators_annlite = {
 def test_filtering(tmpdir, operator: str):
     n_dim = 256
 
-    indexer = AnnliteIndexer(
+    indexer = AnnLiteIndexer(
         data_path=str(tmpdir), n_dim=n_dim, columns=[('price', 'float')]
     )
 
