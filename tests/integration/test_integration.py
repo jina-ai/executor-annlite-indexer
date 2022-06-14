@@ -52,6 +52,33 @@ def test_reload_keep_state(tmpdir):
     assert first_matches == second_matches
 
 
+def test_filter(tmpdir):
+    n_dim = 3
+
+    f = Flow().add(
+        uses=AnnliteIndexer,
+        uses_with={
+            'data_path': str(tmpdir),
+            'n_dim': n_dim,
+            'columns': [('price', 'float')],
+        },
+    )
+
+    docs = DocumentArray([Document(id=f'r{i}', tags={'price': i}) for i in range(10)])
+
+    with f:
+        f.index(docs)
+
+        max_price = 3
+        filter_ = {'price': {'$eq': max_price}}
+
+        result = f.post(
+            on='/filter', parameters={'filter': filter_}
+        )
+
+        assert len(result) == 1
+        assert result[0].tags['price'] == max_price
+
 numeric_operators_annlite = {
     '$gte': operator.ge,
     '$gt': operator.gt,
