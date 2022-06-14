@@ -42,7 +42,6 @@ class AnnliteIndexer(Executor):
         }
 
         self._index = DocumentArray(storage='annlite', config=config)
-        self.logger = JinaLogger(self.metas.name)
 
     @requests(on='/index')
     def index(self, docs: DocumentArray, **kwargs):
