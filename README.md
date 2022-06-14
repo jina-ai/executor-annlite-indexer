@@ -59,11 +59,52 @@ with f:
 print('The ID of the best match of [1,1] is: ', docs[0].matches[0].id)
 ```
 
+### Filter the indexed Documents:
 
-### Using filtering
-To do filtering with the AnnliteIndexer you should first define columns and precise the dimension of your embedding space.
+You can filter the indexed Documents by calling the `/filter` endpoint.
+
+
 For instance :
 
+```python
+from jina import Flow
+
+f = Flow().add(
+    uses='jinahub+docker://AnnliteIndexer',
+    uses_with={
+        'data_path': 'data_path/',
+        'n_dim': 256,
+        'columns': [('price', 'float')],
+    },
+)
+
+```
+
+Then you can pass a filter as a parameters when searching for document:
+```python
+from docarray import Document, DocumentArray
+import numpy as np
+
+docs = DocumentArray(
+    [
+        Document(id=f'r{i}', embedding=np.random.rand(3), tags={'price': i})
+        for i in range(50)
+    ]
+)
+
+filter_ = {'price': {'$eq': 3}}
+
+with f:
+    f.index(docs)
+    response_docs = f.post(on='/filter', parameters={'filter': filter_})
+    print(response_docs[:,'tags__price'])
+>>>
+```
+
+### Using filtering in search
+To do filtering with the AnnliteIndexer you should first define columns and precise the dimension of your embedding space.
+
+For instance :
 
 ```python
 from jina import Flow
