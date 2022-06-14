@@ -201,3 +201,20 @@ def test_filtering(tmpdir, operator: str):
                 for r in doc_query[0].matches
             ]
         )
+
+
+def test_status(tmpdir):
+    n_dim = 256
+    docs = DocumentArray([
+        Document(embedding=np.random.rand(n_dim))
+        for _ in range(50)
+    ])
+
+    indexer = AnnLiteIndexer(
+        n_dim=n_dim, data_path=str(tmpdir), columns=[('price', 'float')]
+    )
+
+    indexer.index(docs)
+    status = indexer.status()[0]
+    assert int(status.tags['total_docs']) == 50
+    assert int(status.tags['index_size']) == 50
