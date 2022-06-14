@@ -115,7 +115,27 @@ def test_search(metric, metric_name, docs, tmpdir):
         assert sorted(similarities, reverse=True) == similarities
 
 
-def test_clear(docs, docker_compose, tmpdir):
+def test_filter(tmpdir):
+    n_dim = 3
+
+
+    docs = DocumentArray([Document(id=f'r{i}', tags={'price': i}) for i in range(10)])
+    indexer = AnnliteIndexer(
+        data_path=str(tmpdir), n_dim=n_dim, columns=[('price', 'float')]
+    )
+
+
+    indexer.index(docs)
+
+    max_price = 3
+    filter_ = {'price': {'$eq': max_price}}
+
+    result = indexer.filter(parameters={'filter': filter_})
+
+    assert len(result) == 1
+    assert result[0].tags['price'] == max_price
+
+def test_clear(docs, tmpdir):
     indexer = AnnliteIndexer(data_path=str(tmpdir))
     indexer.index(docs)
     assert len(indexer._index) == 6
@@ -124,7 +144,7 @@ def test_clear(docs, docker_compose, tmpdir):
 
 
 @pytest.mark.parametrize('type_', ['int', 'float'])
-def test_columns(docker_compose, tmpdir, type_):
+def test_columns(tmpdir, type_):
     n_dim = 3
     indexer = AnnliteIndexer(
         data_path=str(tmpdir), n_dim=n_dim, columns=[('price', type_)]
@@ -151,7 +171,7 @@ numeric_operators_annlite = {
 
 
 @pytest.mark.parametrize('operator', list(numeric_operators_annlite.keys()))
-def test_filtering(docker_compose, tmpdir, operator: str):
+def test_filtering(tmpdir, operator: str):
     n_dim = 256
 
     indexer = AnnliteIndexer(

@@ -104,6 +104,15 @@ class AnnliteIndexer(Executor):
         for doc in docs:
             doc.embedding = self._index[doc.id].embedding
 
+    @requests(on='/filter')
+    def filter(self, parameters: Dict, **kwargs):
+        """
+        Query documents from the indexer by the filter `query` object in parameters. The `query` object must follow the
+        specifications in the `find` method of `DocumentArray` using annlite: https://docarray.jina.ai/fundamentals/documentarray/find/#filter-with-query-operators
+        :param parameters: Dictionary to define the `filter` that you want to use.
+        """
+        return self._index.find(parameters.get('filter', None))
+
     @requests(on='/clear')
     def clear(self, **kwargs):
         """
