@@ -2,7 +2,7 @@ from jina import Executor, requests
 from typing import Optional, Dict, List, Tuple
 from docarray import Document, DocumentArray
 from jina.logging.logger import JinaLogger
-
+from warnings import warn
 
 class AnnLiteIndexer(Executor):
     def __init__(
@@ -15,8 +15,8 @@ class AnnLiteIndexer(Executor):
         ef_search: Optional[int] = None,
         max_connection: Optional[int] = None,
         include_metadata: bool = True,
-        index_traversal_paths: str = '@r',
-        search_traversal_paths: str = '@r',
+        index_access_paths: str = '@r',
+        search_access_paths: str = '@r',
         columns: Optional[List[Tuple[str, str]]] = None,
         *args,
         **kwargs,
@@ -30,18 +30,22 @@ class AnnLiteIndexer(Executor):
         :param include_metadata: If True, return the document metadata in response
         :param ef_construction: The construction time/accuracy trade-off
         :param ef_search: The query time accuracy/speed trade-off
-        :param index_traversal_paths: Default traversal paths on docs
+        :param index_access_paths: Default access paths on docs
                 (used for indexing, delete and update), e.g. '@r', '@c', '@r,c'
-        :param search_traversal_paths: Default traversal paths on docs
+        :param search_access_paths: Default access paths on docs
         (used for search), e.g. '@r', '@c', '@r,c'
         :param columns: precise columns for the Indexer (used for filtering).
         """
+        if ("index_traversal_paths" in kwargs.keys()):
+            warn("'index_traversal_paths' is deprecated, please use 'index_access_paths'.",DeprecationWarning,stacklevel=2)
+        if ("search_traversal_paths" in kwargs.keys()):
+            warn("'search_traversal_paths' is deprecated, please use 'search_access_paths'.",DeprecationWarning,stacklevel=2)
         super().__init__(*args, **kwargs)
         self.logger = JinaLogger(self.__class__.__name__)
         self.limit = limit
         self.include_metadata = include_metadata
-        self.index_traversal_paths = index_traversal_paths
-        self.search_traversal_paths = search_traversal_paths
+        self.index_access_paths = index_access_paths
+        self.search_access_paths = search_access_paths
 
         config = {
             'n_dim': n_dim,
@@ -61,10 +65,10 @@ class AnnLiteIndexer(Executor):
         :param docs: the Documents to index
         :param parameters: dictionary with options for indexing
         Keys accepted:
-            - 'traversal_paths' (str): traversal path for the docs
+            - 'access_paths' (str): access path for the docs
         """
-        traversal_paths = parameters.get('traversal_paths', self.index_traversal_paths)
-        flat_docs = docs[traversal_paths]
+        access_paths = parameters.get('access_paths', self.index_access_paths)
+        flat_docs = docs[access_paths]
         if len(flat_docs) == 0:
             return
 
@@ -83,7 +87,7 @@ class AnnLiteIndexer(Executor):
         :param parameters: dictionary for parameters for the search operation
         Keys accepted:
             - 'filter' (dict): the filtering conditions on document tags
-            - 'traversal_paths' (str): traversal paths for the docs
+            - 'access_paths' (str): access paths for the docs
             - 'limit' (int): nr of matches to get per Document
         :param kwargs: additional kwargs for the endpoint
 
@@ -112,13 +116,13 @@ class AnnLiteIndexer(Executor):
         :param docs: the Documents to update
         :param parameters: dictionary with options for updating
         Keys accepted:
-            - 'traversal_paths' (str): traversal path for the docs
+            - 'access_paths' (str): access path for the docs
         """
         if not docs:
             return
 
-        traversal_paths = parameters.get('traversal_paths', self.index_traversal_paths)
-        flat_docs = docs[traversal_paths]
+        access_paths = parameters.get('access_paths', self.index_access_paths)
+        flat_docs = docs[access_paths]
         if len(flat_docs) == 0:
             return
 
