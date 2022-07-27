@@ -34,7 +34,7 @@ class AnnLiteIndexer(Executor):
         :param index_access_paths: Default access paths on docs
                 (used for indexing, delete and update), e.g. '@r', '@c', '@r,c'
         :param index_traversal_paths: please use index_access_paths
-        :param search_access_paths: Default access paths on docs
+        :param search_access_paths: Default traversal paths on docs
         (used for search), e.g. '@r', '@c', '@r,c'
         :param search_traversal_paths:please use search_access_paths
         :param columns: precise columns for the Indexer (used for filtering).
@@ -78,7 +78,7 @@ class AnnLiteIndexer(Executor):
         :param docs: the Documents to index
         :param parameters: dictionary with options for indexing
         Keys accepted:
-            - 'access_paths' (str): access path for the docs
+            - 'access_paths' (str): traversal path for the docs
         """
         access_paths = parameters.get('access_paths', self.index_access_paths)
         flat_docs = docs[access_paths]
@@ -100,7 +100,7 @@ class AnnLiteIndexer(Executor):
         :param parameters: dictionary for parameters for the search operation
         Keys accepted:
             - 'filter' (dict): the filtering conditions on document tags
-            - 'access_paths' (str): access paths for the docs
+            - 'access_paths' (str): traversal paths for the docs
             - 'limit' (int): nr of matches to get per Document
         :param kwargs: additional kwargs for the endpoint
 
@@ -129,7 +129,7 @@ class AnnLiteIndexer(Executor):
         :param docs: the Documents to update
         :param parameters: dictionary with options for updating
         Keys accepted:
-            - 'access_paths' (str): access path for the docs
+            - 'access_paths' (str): traversal path for the docs
         """
         if not docs:
             return
