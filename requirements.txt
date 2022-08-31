@@ -1,1 +1,2 @@
+annlite==0.3.9
 docarray[annlite]>=0.13.22
