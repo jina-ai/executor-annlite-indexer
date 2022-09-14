@@ -1,5 +1,5 @@
 from jina import Executor, requests
-from typing import Optional, Dict, List, Tuple
+from typing import Optional, Dict, List, Tuple, Union
 from docarray import Document, DocumentArray
 from jina.logging.logger import JinaLogger
 import warnings
@@ -18,7 +18,7 @@ class AnnLiteIndexer(Executor):
         index_traversal_paths: Optional[str] = None,
         search_access_paths: str = '@r',
         search_traversal_paths: Optional[str] = None,
-        columns: Optional[List[Tuple[str, str]]] = None,
+        columns: Optional[Union[List[Tuple[str, str]],Dict[str, str]]] = None,
         *args,
         **kwargs,
     ):
