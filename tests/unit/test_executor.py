@@ -73,7 +73,6 @@ def test_update(docs, update_docs, tmpdir):
 
     # update first doc
     annlite_index.update(update_docs)
-    assert annlite_index._index[0].id == 'doc1'
     assert annlite_index._index['doc1'].text == 'modified'
 
 
