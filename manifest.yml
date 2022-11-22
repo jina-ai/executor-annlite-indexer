@@ -1,5 +1,0 @@
-manifest_version: 1
-name: AnnLiteIndexer
-description: AnnLiteIndexer indexes Documents into Annlite server using DocumentArray  with ` `storage='annlite'`
-url: https://github.com/jina-ai/annlite
-keywords: ['indexer annlite ann similarity_search database pq hnsw pre-filtering']
