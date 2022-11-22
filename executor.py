@@ -68,6 +68,7 @@ class AnnLiteIndexer(Executor):
             'max_connection': max_connection,
             'data_path': data_path or self.workspace or './workspace',
             'columns': columns,
+            'list_like': False,
         }
 
         self._index = DocumentArray(storage='annlite', config=config)
