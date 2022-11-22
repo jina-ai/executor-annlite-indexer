@@ -95,6 +95,7 @@ def test_persistence(docs, tmpdir):
 
     annlite_index1 = AnnLiteIndexer(metric='euclidean', data_path=data_path)
     annlite_index1.index(docs)
+    annlite_index1._index._annlite.close()
     annlite_index2 = AnnLiteIndexer(metric='euclidean', data_path=data_path)
     assert_document_arrays_equal(annlite_index2._index, docs)
 
