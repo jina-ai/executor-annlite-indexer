@@ -73,7 +73,6 @@ def test_update(docs, update_docs, tmpdir):
 
     # update first doc
     annlite_index.update(update_docs)
-    assert annlite_index._index[0].id == 'doc1'
     assert annlite_index._index['doc1'].text == 'modified'
 
 
@@ -100,11 +99,8 @@ def test_persistence(docs, tmpdir):
     assert_document_arrays_equal(annlite_index2._index, docs)
 
 
-@pytest.mark.parametrize(
-    'metric, metric_name',
-    [('euclidean', 'euclid_similarity'), ('cosine', 'cosine_similarity')],
-)
-def test_search(metric, metric_name, docs, tmpdir):
+@pytest.mark.parametrize('metric', ['euclidean', 'cosine'])
+def test_search(metric, docs, tmpdir):
     # test general/normal case
     indexer = AnnLiteIndexer(data_path=str(tmpdir), metric=metric)
     indexer.index(docs)
@@ -112,8 +108,8 @@ def test_search(metric, metric_name, docs, tmpdir):
     indexer.search(query)
 
     for doc in query:
-        similarities = [t[metric_name].value for t in doc.matches[:, 'scores']]
-        assert sorted(similarities, reverse=True) == similarities
+        similarities = [t[metric].value for t in doc.matches[:, 'scores']]
+        assert sorted(similarities) == similarities
 
 
 def test_filter(tmpdir):
